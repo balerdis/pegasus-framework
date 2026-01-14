@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pegasus-framework"
+version = "0.1.0"
+description = "Core platform framework for backend services by Pegasus Online"
+requires-python = ">=3.11"
+
+dependencies = [
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.optional-dependencies]
+
+api = [
+    "fastapi>=0.125.0",
+]
+
+db = [
+    "sqlalchemy>=2.0",
+    "alembic>=1.17",
+    "pymysql>=1.1",
+]
+
+security = [
+    "passlib[bcrypt]>=1.7.4",
+]
+
+dotenv = [
+    "python-dotenv>=1.0",
+]
+
+
