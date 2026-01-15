@@ -1,3 +1,4 @@
+# pegasus_framework/db/repositories/base_repository.py
 import logging
 from typing import Generic, Optional, TypeVar, Type, Sequence
 from sqlalchemy import select, func
@@ -8,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from pegasus_framework.core.exceptions.domain.duplicate_entry import DuplicateEntityError
 from pegasus_framework.db.repositories.protocols.soft_delete_model import SoftDeleteModel
 from datetime import datetime
-
+from pegasus_framework.core.exceptions.domain.entity_not_found import EntityNotFoundError
 import pytz
 tz = pytz.timezone("America/Argentina/Buenos_Aires")
 
@@ -17,24 +18,19 @@ logger = logging.getLogger(__name__)
 
 ModelType = TypeVar("ModelType", bound=SoftDeleteModel)
 
-class EntityNotFoundError(Exception):
-    pass
-
 class BaseRepository(Generic[ModelType]):
     def __init__(self, model_class: Type[ModelType], session: Session):
         self.model_class = model_class
         self.session = session
 
+    def _base_query(self):
+        return select(self.model_class).where(
+            self.model_class.habilited.is_(True),
+            self.model_class.deleted_at.is_(None),
+        )
     # se filtran los borrados via soft delete
     def get_by_id(self, id: int) -> Optional[ModelType]:
-        smt = (
-            select(self.model_class)
-              .where(
-                  self.model_class.id == id,
-                  self.model_class.habilited.is_(True),
-                  self.model_class.deleted_at.is_(None)
-               )
-        )
+        smt = self._base_query().where(self.model_class.id == id)
         result = self.session.execute(smt).scalar_one_or_none()
         return result
     
@@ -52,11 +48,7 @@ class BaseRepository(Generic[ModelType]):
         
 
         smt = (
-            select(self.model_class)
-            .where(
-                self.model_class.habilited.is_(True),
-                self.model_class.deleted_at.is_(None)
-                )
+            self._base_query()
             .offset(offset)
             .limit(fetch)
         )
@@ -70,32 +62,10 @@ class BaseRepository(Generic[ModelType]):
 
 
     def create(self, data: dict, unique_field: str = "name") -> ModelType:
-        try:
-            entity = self.model_class(**data)
-            self.session.add(entity)
-            self.session.flush()
-            return entity
-
-        except IntegrityError as e:
-            self.session.rollback()
-
-            # MySQL duplicate key
-            if "Duplicate entry" in str(e.orig):
-                value = data.get(unique_field)
-
-                if value is None:
-                    raise RuntimeError(
-                        f"Unique field '{unique_field}' not present in data for "
-                        f"{self.model_class.__name__}"
-                    )
-
-                raise DuplicateEntityError(
-                    entity=self.model_class.__name__,
-                    field=unique_field,
-                    value=value,
-                ) from e
-
-            raise
+        entity = self.model_class(**data)
+        self.session.add(entity)
+        self.session.flush()
+        return entity
 
     # Este método update() queda comentado porque no se utiliza un update explícito.
     # Al trabajar con el patrón Unit of Work (es decir, utilizando una única sesión de base de datos),

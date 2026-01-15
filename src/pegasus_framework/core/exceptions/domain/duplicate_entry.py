@@ -1,4 +1,4 @@
-# app/core/exceptions/domain/duplicate_entry.py
+# pegasus_framework/core/exceptions/domain/duplicate_entry.py
 class DuplicateEntityError(Exception):
     def __init__(self, entity: str, field: str, value: str):
         self.entity = entity

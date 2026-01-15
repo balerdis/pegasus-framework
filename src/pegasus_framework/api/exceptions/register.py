@@ -1,4 +1,4 @@
-# app/api/exceptions/register.py
+# pegasus_framework/api/exceptions/register.py
 from .handlers.duplicate_entry import duplicate_entity_exception_handler
 from .handlers.entity_not_found import entity_not_found_handler
 from .handlers.http_exception import http_exception_handler

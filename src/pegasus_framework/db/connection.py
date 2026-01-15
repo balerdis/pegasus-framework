@@ -1,10 +1,10 @@
+# pegasus_framework/db/connection.py
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from pegasus_framework.core.config.config import config
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
 import logging
-from .models import Base
 
 logger = logging.getLogger(__name__)
 
@@ -62,22 +62,6 @@ class DatabaseConnection:
             yield db
         finally:
             db.close()
-
-    def create_tables(self):
-        try:
-            Base.metadata.create_all(bind=self.engine)
-            logger.info("Tablas Creadas/Verificadas correctamente")
-        except Exception as e:
-            logger.error(f"Error al crear tablas: {e}")
-            raise
-
-    def drop_tables(self):
-        try:
-            Base.metadata.drop_all(bind=self.engine)
-            logger.info("Tablas eliminadas correctamente")
-        except Exception as e:
-            logger.error(f"Error al eliminar tablas: {e}")
-            raise
 
     def close_connection(self):
         if self.engine:
