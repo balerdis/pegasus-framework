@@ -27,32 +27,6 @@ class BaseUser:
     last_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     address: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    # === Estado ===
-    habilited: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True,
-    )
-
-    deleted_at: Mapped[datetime | None] = mapped_column(
-        DateTime,
-        nullable=True,
-    )
-
-    # === Auditoría ===
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-    )
-
-    modificated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-    )
-
     # === Contratos de comportamiento ===
     def can_login(self) -> bool:
         return self.habilited and self.deleted_at is None

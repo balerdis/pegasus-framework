@@ -31,12 +31,6 @@ class UserSessionBase:
         doc="Indica si la sesión/token fue revocado"
     )
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        default=datetime.utcnow
-    )
-
     expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
