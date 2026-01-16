@@ -2,11 +2,9 @@
 import logging
 from typing import Generic, Optional, TypeVar, Type, Sequence
 from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from pegasus_framework.core.exceptions.domain.duplicate_entry import DuplicateEntityError
 from pegasus_framework.db.repositories.protocols.soft_delete_model import SoftDeleteModel
 from datetime import datetime
 from pegasus_framework.core.exceptions.domain.entity_not_found import EntityNotFoundError
