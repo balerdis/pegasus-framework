@@ -9,8 +9,8 @@ description = "Core platform framework for backend services by Pegasus Online"
 requires-python = ">=3.11"
 
 dependencies = [
-    "pydantic>=2.0",
-    "pydantic-settings>=2.0",
+    "pydantic>=2.0,<3.0",
+    "pydantic-settings>=2.0,<3.0",
 ]
 
 [tool.setuptools]
@@ -18,15 +18,16 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["pegasus_framework*"]
 
 [project.optional-dependencies]
 
 api = [
-    "fastapi>=0.125.0",
+    "fastapi>=0.125.0,<1.0.0",
 ]
 
 db = [
-    "sqlalchemy>=2.0",
+    "sqlalchemy>=2.0,<3.0",
     "alembic>=1.17",
     "pymysql>=1.1",
 ]
