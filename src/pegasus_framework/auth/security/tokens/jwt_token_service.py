@@ -3,6 +3,10 @@ from typing import Any, Dict
 import uuid
 
 import jwt
+from jwt.exceptions import ExpiredSignatureError, PyJWTError
+
+from pegasus_framework.core.exceptions.domain import InvalidAccessTokenError
+
 
 
 class JwtTokenService:
@@ -79,7 +83,6 @@ class JwtTokenService:
         self,
         *,
         token: str,
-        now: datetime | None = None,
     ) -> Dict[str, Any]:
         """
         Decodifica y valida un JWT.
@@ -92,15 +95,22 @@ class JwtTokenService:
         options = {
             "require": ["exp", "iat", "jti", "sub"],
         }
+        try:
+            decoded = jwt.decode(
+                token,
+                self._secret_key,
+                algorithms=[self._algorithm],
+                issuer=self._issuer,
+                audience=self._audience,
+                options=options,
+            )
 
-        decoded = jwt.decode(
-            token,
-            self._secret_key,
-            algorithms=[self._algorithm],
-            issuer=self._issuer,
-            audience=self._audience,
-            options=options,
-        )
+        except ExpiredSignatureError:
+            # Específico para tokens cuya fecha 'exp' ya pasó
+            raise InvalidAccessTokenError("Token expirado")
+
+        except PyJWTError:
+            raise InvalidAccessTokenError()      
 
         return decoded
 
