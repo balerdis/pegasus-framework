@@ -3,7 +3,7 @@ from typing import Any, Dict
 import uuid
 
 import jwt
-from jwt.exceptions import ExpiredSignatureError, PyJWTError
+from jwt import ExpiredSignatureError, PyJWTError
 
 from pegasus_framework.core.exceptions.domain import InvalidAccessTokenError
 
