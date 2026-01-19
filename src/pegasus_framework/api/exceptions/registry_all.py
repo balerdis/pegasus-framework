@@ -1,3 +1,4 @@
+# pegasus_framework/api/exceptions/registry_all.py
 from fastapi import FastAPI
 
 from .registry_domain import register_domain_exception_handlers
