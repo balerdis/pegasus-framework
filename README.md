@@ -193,3 +193,12 @@ Eso es responsabilidad de cada aplicación.
 ## Documentación adicional
 
 Para entender cómo una aplicación consume este framework y cómo se organiza el sistema completo, consultar el README y la documentación de la aplicación correspondiente.
+
+# 14. Limitaciones generales en la capa de middleware
+ - AuthContextMiddleware: Extraer y normalizar identidad técnica del request para consumo por otros middlewares (rate-limit, logging, métricas). No es un middleware de autenticación (No autentica, no autoriza, no valida tokens).
+ - Nunca validar sesión en middleware
+ - Nunca acceder a DB desde middleware
+ - Nunca usar user_id
+ - Nunca loggear tokens
+ - Solo hashes / fingerprints
+ - Fallar rápido (429)
