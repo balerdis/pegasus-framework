@@ -9,7 +9,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         super().__init__()
         self._session: Session | None = None
 
-    def _commit(self):
+    def commit(self):
         self._get_session().commit()
 
     def _get_session(self) -> Session:
@@ -22,7 +22,8 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         return self
 
     def rollback(self) -> None:
-        self._get_session().rollback()
+        if self._session is not None:
+            self._session.rollback()
 
     def repo(self, repo_cls):
         return repo_cls(self._get_session())
