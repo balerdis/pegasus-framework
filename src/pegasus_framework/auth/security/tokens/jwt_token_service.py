@@ -25,11 +25,27 @@ class JwtTokenService:
         algorithm: str = "HS256",
         issuer: str | None = None,
         audience: str | None = None,
+        access_token_ttl: timedelta,
     ):
         self._secret_key = secret_key
         self._algorithm = algorithm
         self._issuer = issuer
         self._audience = audience
+        self._access_token_ttl = access_token_ttl
+
+    def generate_access_token(
+        self,
+        *,
+        subject: str,
+        additional_claims: Dict[str, Any] | None = None,
+        now: datetime | None = None,
+    ) -> Dict[str, Any]:
+        return self.generate_token(
+            subject=subject,
+            expires_delta=self._access_token_ttl,
+            additional_claims=additional_claims,
+            now=now,
+        )
 
     def generate_token(
         self,
@@ -104,7 +120,9 @@ class JwtTokenService:
                 audience=self._audience,
                 options=options,
             )
-
+            if not isinstance(decoded.get("sub"), str):
+                raise InvalidAccessTokenError("Subject inválido")
+            
         except ExpiredSignatureError:
             # Específico para tokens cuya fecha 'exp' ya pasó
             raise InvalidAccessTokenError("Token expirado")
