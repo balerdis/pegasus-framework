@@ -6,6 +6,7 @@ from pegasus_framework.db.unit_of_work.base import UnitOfWork
 
 class SqlAlchemyUnitOfWork(UnitOfWork):
     def __init__(self):
+        super().__init__()
         self._session: Session | None = None
 
     def _commit(self):

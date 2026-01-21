@@ -23,8 +23,3 @@ class UnitOfWork(ABC):
     def __exit__(self, exc_type, exc, tb):
         if exc_type:
             self.rollback()
-        else:
-            if not self._committed:
-                raise RuntimeError(
-                    "UnitOfWork exited without commit()"
-                )
