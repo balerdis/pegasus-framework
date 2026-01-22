@@ -51,14 +51,35 @@ El framework está organizado como un **monorepo modular**, con un único paquet
 
 ```text
 pegasus_framework/
-└── src/
-    └── pegasus_framework/
-        ├── api/       # componentes HTTP reutilizables
-        ├── auth/      # autenticación y seguridad
-        ├── business/  # módulos de negocio reutilizables
-        ├── core/      # utilidades transversales
-        ├── db/        # base de datos, repositorios, UoW
-        └── wiring/    # providers y bootstrap
+├── pyproject.toml                     # File dependencias para package del pegasus-framework
+├── README.md                          # File de Documentacion del pegasus-framework
+└── src                                # Directorio para estructura necesaria para exponer como package el proyecto
+    └── pegasus_framework              # Directorio para estructura necesaria para exponer como package el proyecto
+        ├── api                        # Directorio para todo lo que tenga que ver referido a la app api
+        │   ├── exceptions             # Directorio para trabajar con exception de la app api
+        │   │   ├── handlers           # Directorio para handlers de exception domain personalizadas y sus registries
+        │   ├── middleware             # Directorio para establecer middleware de auth (ver documentacion sobre esto)
+        │   ├── system                 # Directorio para endpoints del system pegasus-framework (vale para cualquier app)
+        │   └── v1                     # Directorio para logica para exponer codigo utilizable por la app api v1
+        │       └── schemas            # Directorio para los schemas DTOs utilización de la capa service de la app api v1
+        ├── auth                       # Directorio para el sistema de Authentication y Authorization del framework
+        │   ├── exceptions             # Directorio para las exceptions en el auth del framework (que luego seran registradas con registry)
+        │   ├── models                 # Directorio para modelos de la base de datos que son cross a todas las apps
+        │   ├── repositories           # Directorio para el patron repositories sobre tablas cross a todas las apps
+        │   ├── security               # Directorio para los servicios "tecnicos" referidos a la seguridad en el Auth del pegasus-framework
+        │   └── services               # Directorio para los domain service de Auth
+        ├── business                   # Directorio para las clases "base" de todo service del framework y de la app
+        ├── core                       # Directorio para la logica que no tiene que ver con la app api
+        │   ├── config                 # Directorio para la configuracion centralizada del framework
+        │   └── exceptions             # Directorio para las exceptions del framework (que luego seran manejadas por los handlers)
+        │       └── domain             # Directorio para sectorizar las domain exceptions del framework
+        ├── db                         # Directorio para la logica "base" referida a la base de datos
+        │   ├── connection.py          # File central donde se define la conexion a la DB y pool de conexiones
+        │   ├── models                 # Directorio para modelos genericos de base de datos cross a todas las apps
+        │   ├── repositories           # Directorio para repositories de base de datos cross a todas las apps
+        │   └── unit_of_work           # Directorio para implementar Unit of Work transaccional contra la base de datos
+        └── wiring                     # Directorio para wiring con las apps que pueda utilizar la logica del framework con bajo acoplamiento
+
 ```
 
 
