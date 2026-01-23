@@ -1,3 +1,4 @@
+# pegasus_framework/api/exceptions/registry_domain.py
 from fastapi import FastAPI
 from pegasus_framework.core.exceptions.domain.duplicate_entry import DuplicateEntityError
 from pegasus_framework.db.repositories.base_repository import EntityNotFoundError

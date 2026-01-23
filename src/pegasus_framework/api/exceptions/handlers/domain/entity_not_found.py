@@ -1,3 +1,4 @@
+# pegasus_framework/api/exceptions/handlers/domain/entity_not_found.py
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from pegasus_framework.db.repositories.base_repository import EntityNotFoundError
