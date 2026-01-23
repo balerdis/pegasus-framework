@@ -59,7 +59,7 @@ class BaseRepository(Generic[ModelType]):
         )    
 
 
-    def create(self, data: dict, unique_field: str = "name") -> ModelType:
+    def create(self, data: dict) -> ModelType:
         entity = self.model_class(**data)
         self.session.add(entity)
         self.session.flush()
