@@ -1,21 +1,21 @@
 # pegasus_framework/auth/models/users/user_base.py
 
-from sqlalchemy import String, Boolean, DateTime
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime
+from sqlalchemy.ext.declarative import declared_attr
 
 
 class BaseUser:
     __abstract__ = True
 
     # === Identidad ===
-    id: Mapped[int] = mapped_column(primary_key=True)
+    @declared_attr
+    def id(cls) -> Mapped[int]:
+        return mapped_column(primary_key=True)    
 
-    email: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        nullable=False,
-    )
+    @declared_attr
+    def email(cls) -> Mapped[str]:
+        return mapped_column(String(255), unique=True, nullable=False)
 
     password: Mapped[str | None] = mapped_column(
         String(255),

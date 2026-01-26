@@ -26,7 +26,8 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
             self._session.rollback()
 
     def repo(self, repo_cls):
-        return repo_cls(self._get_session())
+        impl = self.resolve_repository(repo_cls)
+        return impl(self._get_session())
 
     def __exit__(self, exc_type, exc, tb):
         try:
