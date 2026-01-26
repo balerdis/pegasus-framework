@@ -1,3 +1,4 @@
+# pegasus_framework/auth/models/users/registry.py
 from typing import Type
 from pegasus_framework.auth.models.users.user_base import BaseUser
 
