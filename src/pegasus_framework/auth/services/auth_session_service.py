@@ -24,6 +24,7 @@ class AuthSessionService:
         token_id: str,
         expires_at,
     ):
+        # SessionRepository es en realidad SqlAlchemySessionRepository
         repo = self._uow.repo(SessionRepository)
         return repo.create(
             user_id=user_id,
