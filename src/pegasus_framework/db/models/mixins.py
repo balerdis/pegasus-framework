@@ -1,3 +1,4 @@
+# pegasus_framework/db/models/mixins.py
 from sqlalchemy import Column, DateTime, Boolean, func
 
 class AuditMixin:
