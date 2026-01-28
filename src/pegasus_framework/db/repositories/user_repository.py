@@ -2,8 +2,8 @@
 from sqlalchemy.orm import Session
 from pegasus_framework.db.repositories.base_repository import BaseRepository
 from pegasus_framework.core.exceptions.domain.entity_not_found import EntityNotFoundError
-from pegasus_framework.auth.models.users.registry import get_user_model
-from pegasus_framework.auth.models.users.user_base import BaseUser
+from pegasus_framework.db.models.users.registry import get_user_model
+from pegasus_framework.db.models.users.user_base import BaseUser
 from typing import Optional, Type
 
 class UserRepository(BaseRepository[BaseUser]):

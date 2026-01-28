@@ -1,7 +1,8 @@
 # pegasus_framework/auth/services/auth_session_service.py
 from datetime import datetime
 
-from pegasus_framework.auth.repositories.sessions.session_repository import (
+from pegasus_framework.db.repositories.auth.sessions.session_repository import SessionRepository
+from pegasus_framework.db.repositories.auth.sessions.session_repository import (
     SessionRepository,
 )
 
