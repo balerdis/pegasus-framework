@@ -1,6 +1,6 @@
 # pegasus_framework/auth/models/users/registry.py
 from typing import Type
-from pegasus_framework.auth.models.users.user_base import BaseUser
+from pegasus_framework.db.models.users.user_base import BaseUser
 
 _user_model: Type[BaseUser] | None = None
 
