@@ -1,7 +1,7 @@
 from sqlalchemy.orm import declarative_mixin, mapped_column, Mapped
 from sqlalchemy import String, DateTime, JSON
 from datetime import datetime
-from typing import Any, dict
+from typing import Any, Dict
 
 @declarative_mixin
 class AuthSessionTokensBase:
@@ -66,7 +66,7 @@ class AuthSessionTokensBase:
             "device_id": "abc123"
             }        
     """
-    extra_data: Mapped[dict[str, Any]] = mapped_column(
+    extra_data: Mapped[Dict[str, Any]] = mapped_column(
         "metadata",
         JSON,
         nullable=True
