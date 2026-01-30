@@ -1,3 +1,4 @@
+# pegasus_framework/auth/models/sessions/auth_session_base.py
 from sqlalchemy.orm import declarative_mixin, mapped_column, Mapped
 from sqlalchemy import String
 from datetime import datetime
