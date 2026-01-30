@@ -8,10 +8,9 @@ def build_auth_request_context(request: Request) -> AuthRequestContext:
 
 
     ip = (
-        headers.get('cf-connecting-ip')
-        or headers.get('x-forwarded-for', "").split(",")[0].strip()
-        or headers.client.host
-        if request.client else None
+        headers.get("cf-connecting-ip")
+        or headers.get("x-forwarded-for", "").split(",")[0].strip()
+        or (request.client.host if request.client else None)
     )
 
     return AuthRequestContext(
