@@ -12,7 +12,7 @@ from pegasus_framework.auth.dto.token_pair import TokenPairDTO
 
 from pegasus_framework.db.repositories.user_repository import UserRepository
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
-
+from pegasus_framework.core.time.clock import Clock
 class  AuthService(SqlAlchemyService):
     """
     Servicio de aplicación para autenticación.
@@ -38,14 +38,14 @@ class  AuthService(SqlAlchemyService):
         identifier: str,
         password: str,
         context: AuthRequestContext | None = None,
-        now: datetime | None = None,
+        now: datetime = Clock.now_utc(),
     ) -> TokenPairDTO:
         """
         Autentica un usuario y retorna un access token JWT.
         El servicio promulga multisession por usuario que permite loggearse en distintos dispositivos
         """
         if now is None:
-            now = datetime.now(timezone.utc)
+            now = Clock.now_utc()
 
         with self._uow() as uow:
             users_repo = uow.repo(UserRepository)
@@ -77,10 +77,12 @@ class  AuthService(SqlAlchemyService):
             # Creamos una session logica del usuario
             AuthSessionService(uow).create_session(
                 user_id=user.id,
-                access_token_id=access_token_data.token_id,
+                access_token_jti=access_token_data.token_jti,
                 access_token_expires_at=access_token_data.expires_at,
-                refresh_token_id=refresh_token_data.token_id,
+                access_token_issued_at=access_token_data.issued_at,
+                refresh_token_jti=refresh_token_data.token_jti,
                 refresh_token_expires_at=refresh_token_data.expires_at,
+                refresh_token_issued_at=refresh_token_data.issued_at,
                 context=context
             )
 
@@ -98,23 +100,23 @@ class  AuthService(SqlAlchemyService):
     def logout(
         self,
         *,
-        token: str,
+        access_token: str,
     ) -> None:
         """
         Revoca la sesión asociada al token JWT.
         """
-        decoded = self._token_service.decode_and_validate(token=token)
-        refresh_token_id = self._token_service.extract_token_id(
+        decoded = self._token_service.decode_and_validate(token=access_token)
+        access_token_jti = self._token_service.extract_token_jti(
             decoded_payload=decoded
         )
 
         with self._uow() as uow:
             AuthSessionService(uow).revoke_session(
-                refresh_token_id=refresh_token_id
+                refresh_token_jti=access_token_jti
             )
             uow.commit()
 
-    def authenticate(self, *, token: str, now: datetime | None = None) -> int:
+    def authenticate(self, *, token: str, now: datetime = Clock.now_utc()) -> int:
         """
         Autentica una identidad a partir de un access token.
 
@@ -123,7 +125,7 @@ class  AuthService(SqlAlchemyService):
         - Retorna user_id
         """
         if now is None:
-            now = datetime.now(timezone.utc)
+            now = Clock.now_utc()
 
         decoded = self._token_service.decode_and_validate(token=token)
         token_id = self._token_service.extract_token_id(
