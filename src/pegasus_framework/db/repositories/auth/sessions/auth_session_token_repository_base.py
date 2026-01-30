@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 import enum
 from typing import Optional
+from pegasus_framework.business.domain.auth.token_type import TokenType
 
 
 class TokenType(enum.Enum):
@@ -10,13 +11,13 @@ class TokenType(enum.Enum):
     REFRESH_TOKEN = "refresh"
 class AuthSessionTokenRepositoryBase(ABC):
 
-    def __init__(self):
-        super().__init__()
-        self.TokenType: enum = TokenType
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.TokenType = TokenType
     @abstractmethod
     def create(self, 
                *,
-               token_id: str,
+               token_jti: str,
                expires_at: datetime,
                token_type: str
                ):
@@ -66,7 +67,7 @@ class AuthSessionTokenRepositoryBase(ABC):
     @abstractmethod
     def get_all_by_token_type_and_user_id(self, 
                                           *,
-                                          token_type: str,
+                                          token_type: TokenType,
                                           user_id: int
                                           ):
         raise NotImplementedError

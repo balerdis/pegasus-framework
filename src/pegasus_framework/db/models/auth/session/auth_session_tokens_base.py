@@ -23,8 +23,8 @@ class AuthSessionTokensBase:
         default="access" # hay que meter esto en un enum y trabajar con ese enum
     )    
 
-    # hash del token, no el token, el token plano solo vive en el cliente
-    token_hash: Mapped[str] = mapped_column(
+    # jti del token
+    token_jti: Mapped[str] = mapped_column(
         String(64),
         nullable=False,
         unique=True

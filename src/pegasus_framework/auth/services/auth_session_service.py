@@ -4,6 +4,8 @@ from datetime import datetime
 from pegasus_framework.db.repositories.auth.sessions.auth_session_token_repository_base import AuthSessionTokenRepositoryBase
 from pegasus_framework.db.repositories.auth.sessions.auth_session_repository_base import AuthSessionRepositoryBase
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
+from pegasus_framework.core.time.clock import Clock
+from pegasus_framework.business.domain.auth.token_type import TokenType
 class AuthSessionService:
     """
     Servicio de dominio técnico para la gestión de sesiones de autenticación.
@@ -20,10 +22,12 @@ class AuthSessionService:
         self,
         *,
         user_id: int,
-        access_token_id: str,
-        access_token_expires_at,
-        refresh_token_id: str,
-        refresh_token_expires_at,
+        access_token_jti: str,
+        access_token_expires_at: datetime,
+        access_token_issued_at: datetime,
+        refresh_token_jti: str,
+        refresh_token_expires_at: datetime,
+        refresh_token_issued_at: datetime,
         context: AuthRequestContext | None = None
     ):
         """El metodo de authSessionService crea una session, siempre que se lo pidan
@@ -43,21 +47,31 @@ class AuthSessionService:
         # para el access_token y un registro para el refresh_token (indica el tipo de token al momento de persistir con 
         # el enum a definir)
         repo_auth_session = self._uow.repo(AuthSessionRepositoryBase)
-        auth_session = repo_auth_session.create(user_id=user_id, context=context)
+
+        auth_session = repo_auth_session.create(
+            last_activity_at = Clock.now_utc(), 
+            expires_at= refresh_token_expires_at, 
+            user_id=user_id, 
+            context=context
+            )
 
         repo_auth_session_token = self._uow.repo(AuthSessionTokenRepositoryBase)
         repo_auth_session_token.create(
             auth_session_id=auth_session.id,
-            token_id=access_token_id,
-            token_type=AuthSessionTokenRepositoryBase.TokenType.ACCESS_TOKEN,
+            token_jti=access_token_jti,
+            token_type=TokenType.ACCESS,
+            issued_at=access_token_issued_at,
             expires_at=access_token_expires_at,
         )
+
         repo_auth_session_token.create(
             auth_session_id=auth_session.id,
-            token_id=refresh_token_id,
-            token_type=AuthSessionTokenRepositoryBase.TokenType.REFRESH_TOKEN,
+            token_jti=refresh_token_jti,
+            token_type=TokenType.REFRESH,
+            issued_at=refresh_token_issued_at,
             expires_at=refresh_token_expires_at,
         )
+
 
 
         return auth_session
@@ -66,7 +80,7 @@ class AuthSessionService:
         self,
         *,
         token_id: str,
-        now: datetime,
+        now: datetime = Clock.now_utc(),
     ):
         repo = self._uow.repo(AuthSessionRepositoryBase)
         return repo.get_valid_by_access_token_id(
@@ -78,10 +92,10 @@ class AuthSessionService:
     def revoke_session(
         self,
         *,
-        refresh_token_id: str,
+        access_token_jti: str,
     ) -> None:
         repo = self._uow.repo(AuthSessionRepositoryBase)
-        repo.revoke(access_token_id=refresh_token_id)
+        repo.revoke(access_token_id=access_token_jti)
 
     def revoke_all_sessions_for_user(
         self,

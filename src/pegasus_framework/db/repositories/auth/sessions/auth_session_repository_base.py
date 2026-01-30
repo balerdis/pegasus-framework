@@ -47,7 +47,7 @@ class AuthSessionRepositoryBase(ABC):
     def revoke(
         self,
         *,
-        access_token_id: str,
+        access_token_jti: str,
         revoked_at: Optional[datetime] = None,
     ) -> None:
         """
@@ -62,7 +62,7 @@ class AuthSessionRepositoryBase(ABC):
         self,
         *,
         user_id: int,
-        revoked_at: Optional[datetime] = datetime.now(datetime.timezone.utc),
+        revoked_at: Optional[datetime],
     ) -> int:
         """
         Revoca todas las sesiones activas de un usuario.
