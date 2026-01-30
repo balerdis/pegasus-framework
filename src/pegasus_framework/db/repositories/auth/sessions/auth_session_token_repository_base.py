@@ -1,4 +1,4 @@
-# pegasus_framework/auth/repositories/sessions/auth_session_token_repository.py
+# pegasus_framework/auth/repositories/sessions/auth_session_token_repository_base.py
 from abc import ABC, abstractmethod
 from datetime import datetime
 import enum
@@ -8,7 +8,7 @@ from typing import Optional
 class TokenType(enum.Enum):
     ACCESS_TOKEN = "access"
     REFRESH_TOKEN = "refresh"
-class AuthSessionTokenRepository(ABC):
+class AuthSessionTokenRepositoryBase(ABC):
 
     def __init__(self):
         super().__init__()

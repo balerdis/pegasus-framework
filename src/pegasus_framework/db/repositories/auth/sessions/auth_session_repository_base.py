@@ -1,10 +1,10 @@
-# pegasus_framework/auth/repositories/sessions/auth_session_repository.py
+# pegasus_framework/auth/repositories/sessions/auth_session_repository_base.py
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
 
-class AuthSessionRepository(ABC):
+class AuthSessionRepositoryBase(ABC):
     """
     Contrato para la persistencia y gestión de sesiones logicas del usuario.
 
@@ -27,7 +27,7 @@ class AuthSessionRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_valid_by_access_token_id(
+    def get_valid_by_token_id(
         self,
         *,
         token_id: str,
@@ -42,21 +42,6 @@ class AuthSessionRepository(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def get_valid_by_refresh_token_id(
-        self,
-        *,
-        token_id: str,
-        now: datetime,
-    ):
-        """
-        Retorna la sesión válida asociada al refresh_token_id o None si:
-
-        - no existe
-        - está revocada
-        - está expirada
-        """
-        raise NotImplementedError
 
     @abstractmethod
     def revoke(
@@ -77,6 +62,7 @@ class AuthSessionRepository(ABC):
         self,
         *,
         user_id: int,
+        revoked_at: Optional[datetime] = datetime.now(datetime.timezone.utc),
     ) -> int:
         """
         Revoca todas las sesiones activas de un usuario.
