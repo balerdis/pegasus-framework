@@ -8,7 +8,7 @@ from jwt import ExpiredSignatureError, PyJWTError
 
 from pegasus_framework.core.exceptions.domain import InvalidAccessTokenError
 from pegasus_framework.auth.dto.token import TokenDTO
-
+from pegasus_framework.core.time.clock import Clock
 
 class JwtTokenService:
     """
@@ -41,8 +41,8 @@ class JwtTokenService:
         *,
         subject: str,
         additional_claims: Dict[str, Any] | None = None,
-        now: datetime | None = None,
-    ) -> Dict[str, Any]:
+        now: datetime = Clock.now_utc(),
+    ) -> TokenDTO:
         return self.generate_token(
             subject=subject,
             expires_delta=self._access_token_ttl,
@@ -55,8 +55,8 @@ class JwtTokenService:
         *,
         subject: str,
         additional_claims: Dict[str, Any] | None = None,
-        now: datetime | None = None,
-    ) -> Dict[str, Any]:
+        now: datetime = Clock.now_utc(),
+    ) -> TokenDTO:
         return self.generate_token(
             subject=subject,
             expires_delta=self._refresh_token_ttl,
@@ -70,7 +70,7 @@ class JwtTokenService:
         subject: str,
         expires_delta: timedelta,
         additional_claims: Dict[str, Any] | None = None,
-        now: datetime | None = None,
+        now: datetime = Clock.now_utc(),
     ) -> TokenDTO:
         """
         Genera un JWT y retorna:
@@ -79,14 +79,14 @@ class JwtTokenService:
         - expires_at
         """
         if now is None:
-            now = datetime.now(timezone.utc)
+            now = Clock.now_utc()
 
         expires_at = now + expires_delta
-        token_id = str(uuid.uuid4())
+        token_jti = str(uuid.uuid4())
 
         payload: Dict[str, Any] = {
             "sub": subject,
-            "jti": token_id,
+            "jti": token_jti,
             "iat": int(now.timestamp()),
             "exp": int(expires_at.timestamp()),
         }
@@ -107,9 +107,10 @@ class JwtTokenService:
         )
 
         return TokenDTO(
-            token_id=token_id,
+            token_jti=token_jti,
             token=token,
             expires_at=expires_at,
+            issued_at=now
         )
 
     def decode_and_validate(
@@ -150,7 +151,7 @@ class JwtTokenService:
         return decoded
 
     @staticmethod
-    def extract_token_id(
+    def extract_token_jti(
         *,
         decoded_payload: Dict[str, Any],
     ) -> str:
