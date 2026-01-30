@@ -1,8 +1,8 @@
 # pegasus_framework/auth/services/auth_session_service.py
 from datetime import datetime
 
-from pegasus_framework.db.repositories.auth.sessions.auth_session_token_repository import AuthSessionTokenRepository
-from pegasus_framework.db.repositories.auth.sessions.auth_session_repository import AuthSessionRepository
+from pegasus_framework.db.repositories.auth.sessions.auth_session_token_repository_base import AuthSessionTokenRepositoryBase
+from pegasus_framework.db.repositories.auth.sessions.auth_session_repository_base import AuthSessionRepositoryBase
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
 class AuthSessionService:
     """
@@ -42,20 +42,20 @@ class AuthSessionService:
         # el id de la auth_session, con el AuthSessionTokensRepository, crea un registro en la tabla auth_session_tokens
         # para el access_token y un registro para el refresh_token (indica el tipo de token al momento de persistir con 
         # el enum a definir)
-        repo_auth_session = self._uow.repo(AuthSessionRepository)
+        repo_auth_session = self._uow.repo(AuthSessionRepositoryBase)
         auth_session = repo_auth_session.create(user_id=user_id, context=context)
 
-        repo_auth_session_token = self._uow.repo(AuthSessionTokenRepository)
+        repo_auth_session_token = self._uow.repo(AuthSessionTokenRepositoryBase)
         repo_auth_session_token.create(
             auth_session_id=auth_session.id,
             token_id=access_token_id,
-            token_type=AuthSessionTokenRepository.TokenType.ACCESS_TOKEN,
+            token_type=AuthSessionTokenRepositoryBase.TokenType.ACCESS_TOKEN,
             expires_at=access_token_expires_at,
         )
         repo_auth_session_token.create(
             auth_session_id=auth_session.id,
             token_id=refresh_token_id,
-            token_type=AuthSessionTokenRepository.TokenType.REFRESH_TOKEN,
+            token_type=AuthSessionTokenRepositoryBase.TokenType.REFRESH_TOKEN,
             expires_at=refresh_token_expires_at,
         )
 
@@ -68,7 +68,7 @@ class AuthSessionService:
         token_id: str,
         now: datetime,
     ):
-        repo = self._uow.repo(AuthSessionRepository)
+        repo = self._uow.repo(AuthSessionRepositoryBase)
         return repo.get_valid_by_access_token_id(
             token_id=token_id,
             now=now,
@@ -80,7 +80,7 @@ class AuthSessionService:
         *,
         refresh_token_id: str,
     ) -> None:
-        repo = self._uow.repo(AuthSessionRepository)
+        repo = self._uow.repo(AuthSessionRepositoryBase)
         repo.revoke(access_token_id=refresh_token_id)
 
     def revoke_all_sessions_for_user(
@@ -88,5 +88,5 @@ class AuthSessionService:
         *,
         user_id: int,
     ) -> int:
-        repo = self._uow.repo(AuthSessionRepository)
+        repo = self._uow.repo(AuthSessionRepositoryBase)
         return repo.revoke_all_for_user(user_id=user_id)
