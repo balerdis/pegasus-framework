@@ -1,3 +1,4 @@
+# pegasus_framework/auth/security/tokens/jwt_token_service.py
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 import uuid
@@ -6,7 +7,7 @@ import jwt
 from jwt import ExpiredSignatureError, PyJWTError
 
 from pegasus_framework.core.exceptions.domain import InvalidAccessTokenError
-
+from pegasus_framework.auth.dto.token import TokenDTO
 
 
 class JwtTokenService:
@@ -15,7 +16,7 @@ class JwtTokenService:
 
     - Stateless
     - Sin acceso a base de datos
-    - No conoce User ni SessionRepository
+    - No conoce User ni AuthSession
     """
 
     def __init__(
@@ -26,12 +27,14 @@ class JwtTokenService:
         issuer: str | None = None,
         audience: str | None = None,
         access_token_ttl: timedelta,
+        refresh_token_ttl: timedelta,
     ):
         self._secret_key = secret_key
         self._algorithm = algorithm
         self._issuer = issuer
         self._audience = audience
         self._access_token_ttl = access_token_ttl
+        self._refresh_token_ttl = refresh_token_ttl
 
     def generate_access_token(
         self,
@@ -46,6 +49,20 @@ class JwtTokenService:
             additional_claims=additional_claims,
             now=now,
         )
+    
+    def generate_refresh_token(
+        self,
+        *,
+        subject: str,
+        additional_claims: Dict[str, Any] | None = None,
+        now: datetime | None = None,
+    ) -> Dict[str, Any]:
+        return self.generate_token(
+            subject=subject,
+            expires_delta=self._refresh_token_ttl,
+            additional_claims=additional_claims,
+            now=now,
+        )
 
     def generate_token(
         self,
@@ -54,7 +71,7 @@ class JwtTokenService:
         expires_delta: timedelta,
         additional_claims: Dict[str, Any] | None = None,
         now: datetime | None = None,
-    ) -> Dict[str, Any]:
+    ) -> TokenDTO:
         """
         Genera un JWT y retorna:
         - el token serializado
@@ -89,11 +106,11 @@ class JwtTokenService:
             algorithm=self._algorithm,
         )
 
-        return {
-            "access_token": token,
-            "token_id": token_id,
-            "expires_at": expires_at,
-        }
+        return TokenDTO(
+            token_id=token_id,
+            token=token,
+            expires_at=expires_at,
+        )
 
     def decode_and_validate(
         self,
