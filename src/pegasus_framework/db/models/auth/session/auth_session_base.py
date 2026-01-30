@@ -52,7 +52,7 @@ class AuthSessionBase:
         nullable=False
     )
 
-    device_fingerprint: Mapped[str] = mapped_column(
+    accept_language: Mapped[str] = mapped_column(
         String(255),
         nullable=True
     )
