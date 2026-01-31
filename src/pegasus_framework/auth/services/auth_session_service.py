@@ -94,13 +94,31 @@ class AuthSessionService:
         *,
         access_token_jti: str,
     ) -> None:
-        repo = self._uow.repo(AuthSessionRepositoryBase)
-        repo.revoke(access_token_id=access_token_jti)
+        now = Clock.now_utc()
 
-    def revoke_all_sessions_for_user(
-        self,
-        *,
-        user_id: int,
-    ) -> int:
-        repo = self._uow.repo(AuthSessionRepositoryBase)
-        return repo.revoke_all_for_user(user_id=user_id)
+        auth_session_token_repo = self._uow.repo(AuthSessionTokenRepositoryBase)
+        auth_session_repo = self._uow.repo(AuthSessionRepositoryBase)
+
+        token = auth_session_token_repo.get_valid_access_token(
+            token_jti=access_token_jti,
+            now=now,
+        )
+
+        if token is None:
+            return  # logout idempotente
+
+        session = auth_session_repo.get_by_id(session_id=token.auth_session_id)
+
+        if session is None or session.revoked_at is not None:
+            return
+
+        auth_session_repo.revoke_by_id(
+            id=session.id,
+            revoked_at=now,
+        )
+
+        auth_session_repo.revoke_by_auth_session_id(
+            auth_session_id=session.id,
+            revoked_at=now,
+        )
+

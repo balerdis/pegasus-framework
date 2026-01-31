@@ -4,7 +4,7 @@ from datetime import datetime
 import enum
 from typing import Optional
 from pegasus_framework.business.domain.auth.token_type import TokenType
-
+from pegasus_framework.db.models.auth.session.auth_session_tokens_base import AuthSessionTokensBase
 
 class TokenType(enum.Enum):
     ACCESS_TOKEN = "access"
@@ -32,42 +32,17 @@ class AuthSessionTokenRepositoryBase(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def get_valid_by_token_id(self, 
-                              *,
-                              token_id: str,
-                              now: datetime
-                              ):
+    def revoke_by_auth_session_id(self, *, 
+                                  auth_session_id: int, 
+                                  revoked_at: datetime
+                                  ):
         raise NotImplementedError
     
     @abstractmethod
-    def get_valid_by_refresh_token_id(self, 
-                                     *,
-                                     token_id: str,
-                                     now: datetime
-                                     ):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def get_valid_by_access_token_id(self, 
-                                    *,
-                                    token_id: str,
-                                    now: datetime
-                                    ):
-        raise NotImplementedError
-    
-    
-    @abstractmethod
-    def get_all_by_user_id(self, 
-                           *,
-                           user_id: int
-                           ):
-        raise NotImplementedError
-    
-   
-    @abstractmethod
-    def get_all_by_token_type_and_user_id(self, 
-                                          *,
-                                          token_type: TokenType,
-                                          user_id: int
-                                          ):
+    def get_valid_access_token(
+        self,
+        *,
+        token_jti: str,
+        now: datetime,
+    ) -> AuthSessionTokensBase | None:
         raise NotImplementedError
