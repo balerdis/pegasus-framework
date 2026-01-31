@@ -159,3 +159,13 @@ class JwtTokenService:
         Extrae el token_id (jti) de un payload ya validado.
         """
         return decoded_payload["jti"]
+
+    @staticmethod
+    def extract_token_sub(
+        *,
+        decoded_payload: Dict[str, Any],
+    ) -> str:
+        """
+        Extrae el subject de un payload ya validado.
+        """
+        return decoded_payload["sub"]
