@@ -97,24 +97,16 @@ class  AuthService(SqlAlchemyService):
             )
 
 
-    def logout(
-        self,
-        *,
-        access_token: str,
-    ) -> None:
-        """
-        Revoca la sesión asociada al token JWT.
-        """
+    def logout(self, *, access_token: str) -> None:
         decoded = self._token_service.decode_and_validate(token=access_token)
-        access_token_jti = self._token_service.extract_token_jti(
-            decoded_payload=decoded
-        )
+        access_token_jti = self._token_service.extract_token_jti(decoded_payload=decoded)
 
         with self._uow() as uow:
             AuthSessionService(uow).revoke_session(
-                refresh_token_jti=access_token_jti
+                access_token_jti=access_token_jti
             )
             uow.commit()
+
 
     def authenticate(self, *, token: str, now: datetime = Clock.now_utc()) -> int:
         """
