@@ -215,7 +215,7 @@ Eso es responsabilidad de cada aplicación.
 
 Para entender cómo una aplicación consume este framework y cómo se organiza el sistema completo, consultar el README y la documentación de la aplicación correspondiente.
 
-# 14. Limitaciones generales en la capa de middleware
+# Limitaciones generales en la capa de middleware
  - AuthContextMiddleware: Extraer y normalizar identidad técnica del request para consumo por otros middlewares (rate-limit, logging, métricas). No es un middleware de autenticación (No autentica, no autoriza, no valida tokens).
  - Nunca validar sesión en middleware
  - Nunca acceder a DB desde middleware
@@ -223,3 +223,68 @@ Para entender cómo una aplicación consume este framework y cómo se organiza e
  - Nunca loggear tokens
  - Solo hashes / fingerprints
  - Fallar rápido (429)
+
+## Invariantes de Dominio — Authentication
+
+Las siguientes reglas son **invariantes del dominio de autenticación** y
+**deben cumplirse en todas las implementaciones** que utilicen este framework.
+
+Estas invariantes **no dependen del transporte (HTTP)** ni de detalles de
+infraestructura, y se aplican exclusivamente en la capa de dominio.
+
+---
+
+### Revocación de sesión
+
+> **Invariant:**  
+> Revocar una `AuthSession` implica revocar **todos** los `AuthSessionToken`
+> asociados a dicha sesión, independientemente de su tipo
+> (`access`, `refresh`, u otros futuros).
+
+Consecuencias:
+
+- Ningún token asociado a una sesión revocada puede considerarse válido.
+- La revocación de tokens es una **responsabilidad del dominio**, no de la capa HTTP.
+- La operación debe ser **atómica** y ejecutarse dentro de una única Unit of Work.
+
+---
+
+### Logout
+
+> **Invariant:**  
+> `logout` es una **operación de dominio idempotente**.
+
+Consecuencias:
+
+- Ejecutar `logout` múltiples veces produce siempre el mismo estado final.
+- Un logout sobre:
+  - un token inválido,
+  - una sesión inexistente,
+  - o una sesión previamente revocada  
+  **no debe producir error**.
+- El dominio garantiza consistencia sin exponer estados intermedios a la aplicación.
+
+---
+
+### Responsabilidad de orquestación
+
+- `AuthService` **orquesta** el caso de uso.
+- `AuthSessionService` **encapsula** las reglas de dominio asociadas a sesiones.
+- Ninguna aplicación consumidora debe:
+  - revocar tokens manualmente,
+  - interpretar estados de sesión,
+  - ni duplicar estas reglas.
+
+Estas invariantes son parte del contrato del framework.
+
+### Evolución del modelo
+
+Estas invariantes permanecen válidas incluso si:
+
+- Se agregan nuevos tipos de token.
+- Se introduce rotación de refresh tokens.
+- Se incorporan múltiples dispositivos por sesión.
+- Se implementa logout global o parcial.
+
+Cualquier cambio que viole estas reglas constituye un **breaking change del dominio**.
+
