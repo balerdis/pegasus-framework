@@ -21,12 +21,6 @@ class AuthSessionBase:
     __abstract__ = True
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    status: Mapped[str] = mapped_column(
-        String(16),
-        nullable=False,
-        default="active" # hay que meter esto en un enum y trabajar con ese enum
-    )
-
     last_activity_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False
