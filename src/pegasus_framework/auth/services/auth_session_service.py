@@ -40,7 +40,7 @@ class AuthSessionService:
             refresh_expires_at (_type_): fecha de expiración del refresh_token
 
         Returns:
-            _type_: _description_
+            _type_: None
         """
         # con el repositorio de AuthSessionRepository, crea un registro en la tabla auth_sessions
         # el id de la auth_session, con el AuthSessionTokensRepository, crea un registro en la tabla auth_session_tokens
@@ -59,7 +59,7 @@ class AuthSessionService:
         repo_auth_session_token.create(
             auth_session_id=auth_session.id,
             token_jti=access_token_jti,
-            token_type=TokenType.ACCESS,
+            token_type=TokenType.ACCESS.value,
             issued_at=access_token_issued_at,
             expires_at=access_token_expires_at,
         )
@@ -67,7 +67,7 @@ class AuthSessionService:
         repo_auth_session_token.create(
             auth_session_id=auth_session.id,
             token_jti=refresh_token_jti,
-            token_type=TokenType.REFRESH,
+            token_type=TokenType.REFRESH.value,
             issued_at=refresh_token_issued_at,
             expires_at=refresh_token_expires_at,
         )
@@ -117,8 +117,10 @@ class AuthSessionService:
             revoked_at=now,
         )
 
-        auth_session_repo.revoke_by_auth_session_id(
+        auth_session_token_repo.revoke_by_auth_session_id(
             auth_session_id=session.id,
             revoked_at=now,
-        )
+        )        
+
+
 
