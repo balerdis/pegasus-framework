@@ -1,3 +1,18 @@
+Copyright (c) 2025 balerdis
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+
+If you use this software to provide a service over a network, you are required
+to make the complete source code of your modified version available under the
+same license.
+
+### Commercial licensing
+
+Commercial licenses are available for organizations that wish to use
+pegasus-framework in proprietary or closed-source systems.
+
+
 # pegasus_framework
 
 ## Descripción general
