@@ -24,14 +24,6 @@ class AuthSessionTokenRepositoryBase(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def revoke(self, 
-               *,
-               token_id: str,
-               revoked_at: Optional[datetime] = None
-               ):
-        raise NotImplementedError
-    
-    @abstractmethod
     def revoke_by_auth_session_id(self, *, 
                                   auth_session_id: int, 
                                   revoked_at: datetime
@@ -46,3 +38,31 @@ class AuthSessionTokenRepositoryBase(ABC):
         now: datetime,
     ) -> AuthSessionTokensBase | None:
         raise NotImplementedError
+    @abstractmethod
+    def get_valid_refresh_token(
+        self,
+        *,
+        token_jti: str,
+        now: datetime,
+    ) -> AuthSessionTokensBase | None:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def update_refresh_token_replaced_by(
+        self,
+        *,
+        refresh_token_jti: str,
+        replaced_by_token_id: str,
+    ) -> None:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def get_valid_by_token_jti(
+        self,
+        *,
+        token_jti: str,
+        now: datetime,
+        token_type: str,
+    ) -> AuthSessionTokensBase | None:
+        raise NotImplementedError
+    
