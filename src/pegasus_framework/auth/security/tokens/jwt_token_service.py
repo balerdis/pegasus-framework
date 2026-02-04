@@ -41,8 +41,10 @@ class JwtTokenService:
         *,
         subject: str,
         additional_claims: Dict[str, Any] | None = None,
-        now: datetime = Clock.now_utc(),
+        now: datetime | None = None,
     ) -> TokenDTO:
+        if now is None:
+            now = Clock.now_utc()        
         return self.generate_token(
             subject=subject,
             expires_delta=self._access_token_ttl,
@@ -55,8 +57,11 @@ class JwtTokenService:
         *,
         subject: str,
         additional_claims: Dict[str, Any] | None = None,
-        now: datetime = Clock.now_utc(),
+        now: datetime | None = None,
     ) -> TokenDTO:
+        if now is None:
+            now = Clock.now_utc()        
+        
         return self.generate_token(
             subject=subject,
             expires_delta=self._refresh_token_ttl,
@@ -70,7 +75,7 @@ class JwtTokenService:
         subject: str,
         expires_delta: timedelta,
         additional_claims: Dict[str, Any] | None = None,
-        now: datetime = Clock.now_utc(),
+        now: datetime | None = None,
     ) -> TokenDTO:
         """
         Genera un JWT y retorna:
@@ -169,3 +174,4 @@ class JwtTokenService:
         Extrae el subject de un payload ya validado.
         """
         return decoded_payload["sub"]
+    
