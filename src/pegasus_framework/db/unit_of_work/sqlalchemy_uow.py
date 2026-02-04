@@ -1,3 +1,4 @@
+# Copyright (c) 2025 balerdis
 # pegasus_framework/db/unit_of_work/sqlalchemy_uow.py
 from sqlalchemy.orm import Session
 from pegasus_framework.db.connection import db_connection

@@ -1,3 +1,4 @@
+# Copyright (c) 2025 balerdis
 # pegasus_framework/db/unit_of_work/base.py
 from abc import ABC, abstractmethod
 from typing import Type, Dict
