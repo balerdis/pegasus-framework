@@ -53,7 +53,8 @@ class AuthSessionTokensBase:
             Se crea uno nuevo
             Se enlazan    
     """
-    replaced_by_token: Mapped[int] = mapped_column(
+    replaced_by_token: Mapped[str] = mapped_column(
+        String(64),
         nullable=True
     )
 
