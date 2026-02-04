@@ -1,6 +1,6 @@
 # pegasus_framework/auth/services/auth_service.py
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from pegasus_framework.business.sqlalchemy_service import SqlAlchemyService
 from pegasus_framework.auth.security.tokens.jwt_token_service import JwtTokenService
@@ -13,6 +13,7 @@ from pegasus_framework.auth.dto.token_pair import TokenPairDTO
 from pegasus_framework.db.repositories.user_repository import UserRepository
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
 from pegasus_framework.core.time.clock import Clock
+from pegasus_framework.business.domain.auth.token_type import TokenType
 class  AuthService(SqlAlchemyService):
     """
     Servicio de aplicación para autenticación.
@@ -38,7 +39,7 @@ class  AuthService(SqlAlchemyService):
         identifier: str,
         password: str,
         context: AuthRequestContext | None = None,
-        now: datetime = Clock.now_utc(),
+        now: datetime | None = None,
     ) -> TokenPairDTO:
         """
         Autentica un usuario y retorna un access token JWT.
@@ -108,7 +109,7 @@ class  AuthService(SqlAlchemyService):
             uow.commit()
 
 
-    def authenticate(self, *, token: str, now: datetime = Clock.now_utc()) -> int:
+    def authenticate(self, *, token: str, now: datetime | None = None) -> int:
         """
         Autentica una identidad a partir de un access token.
 
@@ -120,18 +121,52 @@ class  AuthService(SqlAlchemyService):
             now = Clock.now_utc()
 
         decoded = self._token_service.decode_and_validate(token=token)
-        token_id = self._token_service.extract_token_id(
+        token_jti = self._token_service.extract_token_jti(
             decoded_payload=decoded
         )
 
         with self._uow() as uow:
             session = AuthSessionService(uow).get_valid_session(
-                token_id=token_id,
+                token_jti=token_jti,
                 now=now,
+                token_type=TokenType.ACCESS
             )
 
         if session is None:
-            raise InvalidAuthSessionError()
+            raise InvalidAuthSessionError('Session not found')
+
+        token_sub = int(self._token_service.extract_token_sub(decoded_payload=decoded))
+        if session.user_id != token_sub:
+            raise InvalidAuthSessionError('Session not found')
+
 
         # El subject del JWT define la identidad
-        return int(decoded["sub"])
+        return token_sub
+    
+    def refresh(self, *, refresh_token: str) -> TokenPairDTO:
+        decoded = self._token_service.decode_and_validate(token=refresh_token)
+
+        refresh_token_jti = self._token_service.extract_token_jti(decoded_payload=decoded)
+        user_id = int(self._token_service.extract_token_sub(decoded_payload=decoded))
+
+        new_access = self._token_service.generate_access_token(subject=str(user_id))
+        new_refresh = self._token_service.generate_refresh_token(subject=str(user_id))
+
+        with self._uow() as uow:
+            refresh_token = AuthSessionService(uow).renew_session(
+                refresh_token_jti=refresh_token_jti,
+                new_access_token=new_access,
+                new_refresh_token=new_refresh,
+                expected_user_id=user_id
+            )
+
+            uow.commit()
+
+        return TokenPairDTO(
+            access_token=refresh_token.access_token,
+            expires_at=refresh_token.expires_at,
+            refresh_token=refresh_token.refresh_token,
+            refresh_token_expires_at=refresh_token.refresh_token_expires_at
+        )
+
+
