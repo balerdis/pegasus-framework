@@ -2,4 +2,5 @@
 
 class AuthenticationError(Exception):
     """Base class for authentication-related errors."""
-    pass
+    def __init__(self, message: str | None = None):
+        super().__init__(message)
