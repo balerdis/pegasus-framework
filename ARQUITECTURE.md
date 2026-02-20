@@ -1,3 +1,97 @@
+# Arquitectura del pegasus-framework
+
+## Visión general
+
+El `pegasus-framework` implementa una **arquitectura modular interna** basada en principios de **Clean Architecture**, **Domain-Driven Design (DDD)** y el patrón **Unit of Work (UoW)**. Está diseñado como un framework reusable que provee infraestructura común sin depender de aplicaciones concretas.
+
+El framework se organiza en módulos autocontenidos bajo el namespace `pegasus_framework.*`, permitiendo reutilización y extensión sin modificaciones.
+
+## Principios fundamentales
+
+- **Independencia de aplicaciones:** El framework no conoce ni depende de ninguna aplicación. Las aplicaciones consumen el framework para definir contratos HTTP y lógica específica.
+- **Separación de responsabilidades:** Infraestructura, dominio y presentación están claramente delimitados.
+- **Reutilización:** Componentes como servicios de negocio, repositorios y DTOs son diseñados para ser compartidos entre aplicaciones.
+- **Extensibilidad:** Las aplicaciones pueden extender o sobreescribir comportamientos mediante registries y overrides.
+
+## Capas del framework
+
+### 1. Capa de infraestructura (`db`, `core`)
+
+Responsabilidades:
+- Configuración de SQLAlchemy y conexiones a base de datos.
+- Implementación del patrón Unit of Work para control transaccional.
+- Repositorios base y contratos abstractos.
+- Integración con Alembic para migraciones (aunque las migraciones concretas pertenecen a las aplicaciones).
+
+Características:
+- Aislamiento del ORM del dominio.
+- Sin commits implícitos; el UoW garantiza atomicidad explícita.
+- Los repositorios no exponen métodos `update()`; SQLAlchemy maneja el identity map.
+
+### 2. Capa de dominio (`business`, `auth`)
+
+Responsabilidades:
+- Servicios de negocio reutilizables (ej. autenticación, gestión de usuarios).
+- DTOs de dominio (no HTTP).
+- Reglas de negocio invariantes.
+
+Características:
+- No conocen FastAPI ni contratos HTTP.
+- Operan siempre dentro de una Unit of Work.
+- Pueden ser extendidos por aplicaciones mediante overrides.
+
+### 3. Capa de API (`api`)
+
+Responsabilidades:
+- Componentes HTTP reutilizables: middleware, handlers de excepciones, schemas genéricos.
+- Exposición de contratos comunes (health, status).
+
+Características:
+- No define endpoints finales; eso pertenece a las aplicaciones.
+- Provee herramientas para que las aplicaciones construyan sus APIs.
+
+### 4. Capa de wiring (`wiring`)
+
+Responsabilidades:
+- Provisión de dependencias y construcción de servicios.
+- Centralización de inicialización del framework.
+- Conexión entre infraestructura y dominio.
+
+Características:
+- Punto único de wiring para evitar dependencias distribuidas.
+- Permite overrides y extensiones por parte de aplicaciones.
+
+## Integración con aplicaciones
+
+Las aplicaciones que usan el framework (como pegasus-app-skeleton) deben:
+- Definir su propia `Base` de SQLAlchemy y migraciones con Alembic.
+- Implementar endpoints HTTP y schemas Pydantic.
+- Registrar modelos y providers durante el bootstrap.
+- Consumir servicios del framework mediante dependencias inyectadas.
+
+El flujo típico:
+1. Aplicación inicializa el framework mediante wiring.
+2. Framework provee UoW, repositorios y servicios base.
+3. Aplicación define lógica específica y contratos HTTP.
+4. Todo se orquesta en capas: HTTP → Servicios → UoW → Repositorios → DB.
+
+## Anti-patrones prohibidos
+
+- Framework con migraciones concretas.
+- Framework con `__tablename__` en modelos.
+- Commits fuera de la UoW.
+- Servicios que conocen HTTP.
+- Repositorios expuestos directamente a la API.
+
+## Beneficios del diseño
+
+- Bajo acoplamiento y alta cohesión.
+- Testeo aislado de componentes.
+- Evolución segura sin breaking changes.
+- Consistencia transaccional y de dominio.
+
+---
+
 # Invariantes de Autenticación: Refresh Tokens
 
 ## 1. Fuente de verdad
