@@ -1,6 +1,9 @@
 # pegasus_framework/db/models/mixins.py
 from sqlalchemy import Column, DateTime, Boolean, func
 
+from sqlalchemy.orm import declarative_mixin
+
+@declarative_mixin
 class AuditMixin:
     created_at = Column(
         DateTime,
