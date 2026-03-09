@@ -4,7 +4,7 @@ from datetime import datetime
 from re import A
 from typing import Optional
 from pegasus_framework.auth.context.auth_request_context import AuthRequestContext
-from pegasus_framework.db.models.auth.session.auth_session_base import AuthSessionBase
+from pegasus_framework.db.models.auth.sessions.auth_session_base import AuthSessionBase
 class AuthSessionRepositoryBase(ABC):
     """
     Contrato para la persistencia y gestión de sesiones logicas del usuario.

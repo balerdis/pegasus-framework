@@ -4,7 +4,7 @@ from datetime import datetime
 import enum
 from typing import Optional
 from pegasus_framework.business.domain.auth.token_type import TokenType
-from pegasus_framework.db.models.auth.session.auth_session_tokens_base import AuthSessionTokensBase
+from pegasus_framework.db.models.auth.sessions.auth_session_tokens_base import AuthSessionTokensBase
 
 class TokenType(enum.Enum):
     ACCESS_TOKEN = "access"
