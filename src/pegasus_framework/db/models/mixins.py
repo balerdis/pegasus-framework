@@ -11,7 +11,7 @@ class AuditMixin:
         server_default=func.current_timestamp()
     )
 
-    modificated_at = Column(
+    modified_at = Column(
         DateTime,
         nullable=False,
         server_default=func.current_timestamp(),
